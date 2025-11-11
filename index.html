@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home Loan Calculator - Progressive Disbursement</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🏠 Home Loan Calculator</h1>
+            <p>Calculate EMI with Progressive Disbursement & Prepayment Analysis</p>
+        </header>
+
+        <main>
+            <!-- Save/Load Section -->
+            <section class="card">
+                <h2>💾 Save & Load</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="scenarioName">Scenario Name</label>
+                        <input type="text" id="scenarioName" placeholder="Enter scenario name..." value="Default Scenario">
+                    </div>
+                    <div class="form-group">
+                        <label>Actions</label>
+                        <div class="button-group">
+                            <button type="button" id="saveScenario" class="btn-primary">Save</button>
+                            <button type="button" id="loadScenario" class="btn-secondary">Load</button>
+                            <button type="button" id="exportData" class="btn-secondary">Export</button>
+                            <input type="file" id="importData" accept=".json" style="display: none;">
+                            <button type="button" id="importBtn" class="btn-secondary">Import</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="savedScenarios" class="saved-scenarios"></div>
+            </section>
+
+            <!-- Loan Details Section -->
+            <section class="card">
+                <h2>📋 Loan Details</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="startDate">Loan Start Date</label>
+                        <input type="month" id="startDate" value="2026-01">
+                    </div>
+                    <div class="form-group">
+                        <label for="loanAmount">Total Loan Amount (₹)</label>
+                        <input type="number" id="loanAmount" value="15500000" step="100000">
+                        <small>₹1.55 Crore</small>
+                    </div>
+                    <div class="form-group">
+                        <label for="interestRate">Interest Rate (%)</label>
+                        <input type="number" id="interestRate" value="7.65" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="tenure">Tenure (Years)</label>
+                        <input type="number" id="tenure" value="25" step="1">
+                    </div>
+                </div>
+            </section>
+
+            <!-- Disbursement Schedule Section -->
+            <section class="card">
+                <h2>Disbursement Schedule</h2>
+                <div class="disbursement-controls">
+                    <button type="button" id="addDisbursement" class="btn-primary">+ Add Disbursement</button>
+                    <button type="button" id="clearDisbursements" class="btn-secondary">Clear All</button>
+                </div>
+                <div id="disbursementList" class="disbursement-list">
+                    <!-- Disbursements will be added here dynamically -->
+                </div>
+                <div class="disbursement-summary">
+                    <span>Total Disbursed: ₹<span id="totalDisbursed">0</span></span>
+                    <span>Remaining: ₹<span id="remainingAmount">15,500,000</span></span>
+                </div>
+            </section>
+
+            <!-- Prepayment Schedule Section -->
+            <section class="card">
+                <h2>💰 Prepayment Schedule</h2>
+                <div class="disbursement-controls">
+                    <button type="button" id="addPrepayment" class="btn-primary">+ Add Prepayment</button>
+                    <button type="button" id="clearPrepayments" class="btn-secondary">Clear All</button>
+                </div>
+                <div id="prepaymentList" class="disbursement-list">
+                    <!-- Prepayments will be added here dynamically -->
+                </div>
+                <div class="disbursement-summary">
+                    <span>Total Extra Payments: ₹<span id="totalPrepayments">0</span></span>
+                    <span>Number of Prepayments: <span id="prepaymentCount">0</span></span>
+                </div>
+            </section>
+
+            <!-- EMI Options Section -->
+            <section class="card">
+                <h2>📊 EMI Options</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="extraEMI">Extra EMI per month (₹)</label>
+                        <input type="number" id="extraEMI" value="0" step="1000">
+                        <small>Additional amount added to each EMI</small>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Interest Rate Comparison Section -->
+            <section class="card">
+                <h2>🔍 Interest Rate Comparison</h2>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="compareRate1">Rate 1 (%)</label>
+                        <input type="number" id="compareRate1" value="7.5" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="compareRate2">Rate 2 (%)</label>
+                        <input type="number" id="compareRate2" value="7.65" step="0.01">
+                    </div>
+                    <div class="form-group">
+                        <label for="compareRate3">Rate 3 (%)</label>
+                        <input type="number" id="compareRate3" value="7.8" step="0.01">
+                    </div>
+                </div>
+                <button type="button" id="compareRates" class="btn-secondary">Compare Interest Rates</button>
+                <div id="comparisonResults" class="comparison-results" style="display: none;">
+                    <table id="comparisonTable">
+                        <thead>
+                            <tr>
+                                <th>Rate</th>
+                                <th>EMI</th>
+                                <th>Total Interest</th>
+                                <th>Total Payment</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- Calculate Button -->
+            <section class="card">
+                <button type="button" id="calculateLoan" class="btn-calculate">🧮 Calculate Loan Schedule</button>
+            </section>
+
+            <!-- Results Section -->
+            <section class="card results-section" id="resultsSection" style="display: none;">
+                <h2>Loan Analysis Results</h2>
+                
+                <!-- Summary Cards -->
+                <div class="summary-cards">
+                    <div class="summary-card">
+                        <h3>Current EMI</h3>
+                        <div class="amount" id="currentEMI">₹0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Interest</h3>
+                        <div class="amount" id="totalInterest">₹0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Total Payment</h3>
+                        <div class="amount" id="totalPayment">₹0</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Loan Duration</h3>
+                        <div class="amount" id="loanDuration">0 years 0 months</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Completion Date</h3>
+                        <div class="amount" id="completionDate">-</div>
+                    </div>
+                    <div class="summary-card">
+                        <h3>Interest Saved</h3>
+                        <div class="amount" id="interestSaved">₹0</div>
+                    </div>
+                </div>
+
+                <!-- Charts Section -->
+                <div class="charts-section">
+                    <div class="chart-container">
+                        <canvas id="emiBreakdownChart"></canvas>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="paymentTimelineChart"></canvas>
+                    </div>
+                </div>
+
+                <!-- Payment Schedule Table -->
+                <div class="table-section">
+                    <h3>Payment Schedule</h3>
+                    <div class="table-container">
+                        <table id="paymentScheduleTable">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>EMI</th>
+                                    <th>Principal</th>
+                                    <th>Interest</th>
+                                    <th>Balance</th>
+                                    <th>Disbursement</th>
+                                    <th>Prepayment</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
