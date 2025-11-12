@@ -283,6 +283,8 @@ table th {
 table td {
     padding: 10px 12px;
     border-bottom: 1px solid #eee;
+    font-weight: 600;
+    color: #2c3e50;
 }
 
 table tr:hover {
@@ -616,19 +618,408 @@ table td {
     border-color: #007bff;
 }
 
-/* Responsive adjustments */
-@media (max-width: 768px) {
-    .charts-section {
-        grid-template-columns: 1fr;
-    }
-    
-    .disbursement-item {
-        grid-template-columns: 1fr;
-        gap: 10px;
+/* ===== MOBILE RESPONSIVE DESIGN ===== */
+
+/* Mobile First - Base styles for 320px+ */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 10px;
+}
+
+/* Enhanced mobile typography */
+body {
+    font-size: clamp(14px, 4vw, 16px);
+}
+
+header h1 {
+    font-size: clamp(1.8rem, 6vw, 2.5rem);
+    margin-bottom: 5px;
+}
+
+header p {
+    font-size: clamp(0.9rem, 3vw, 1.1rem);
+}
+
+/* Mobile-first form layouts */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 15px;
+}
+
+/* Touch-friendly buttons */
+.btn-primary, .btn-secondary, .btn-calculate {
+    padding: 14px 20px;
+    min-height: 44px;
+    font-size: clamp(0.9rem, 3vw, 1rem);
+    border-radius: 8px;
+}
+
+.btn-calculate {
+    font-size: clamp(1rem, 4vw, 1.2rem);
+    padding: 16px;
+}
+
+/* Mobile disbursement and prepayment items */
+.disbursement-item,
+.prepayment-item {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    padding: 15px;
+    margin-bottom: 15px;
+}
+
+.disbursement-item .form-group,
+.prepayment-item .form-group {
+    margin-bottom: 0;
+}
+
+/* Mobile-optimized summary cards */
+.summary-cards {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+}
+
+.summary-card {
+    padding: 12px;
+    min-height: 80px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.summary-card h3 {
+    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+    margin-bottom: 5px;
+}
+
+.summary-card .amount {
+    font-size: clamp(1rem, 3.5vw, 1.2rem);
+    line-height: 1.1;
+}
+
+/* Mobile charts */
+.charts-section {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.chart-container {
+    padding: 15px;
+    min-height: 300px;
+}
+
+.chart-container canvas {
+    max-height: 300px;
+}
+
+/* Mobile table enhancements */
+.table-container {
+    max-height: 400px;
+    overflow-x: auto;
+    overflow-y: auto;
+    border-radius: 8px;
+    position: relative;
+}
+
+/* Horizontal scroll indicator */
+.table-container::after {
+    content: "← Scroll horizontally to see more →";
+    position: sticky;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background: #f8f9fa;
+    text-align: center;
+    padding: 8px;
+    font-size: 0.8rem;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+    z-index: 5;
+}
+
+table {
+    min-width: 800px; /* Ensure table doesn't compress too much */
+}
+
+table th {
+    padding: 10px 6px;
+    font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+    white-space: nowrap;
+}
+
+table td {
+    padding: 8px 6px;
+    font-size: clamp(0.7rem, 2.5vw, 0.85rem);
+    white-space: nowrap;
+}
+
+/* Sticky first column on mobile */
+table th:first-child,
+table td:first-child {
+    position: sticky;
+    left: 0;
+    background: white;
+    z-index: 2;
+    box-shadow: 2px 0 4px rgba(0,0,0,0.1);
+}
+
+table th:first-child {
+    background: #34495e;
+    z-index: 3;
+}
+
+/* Mobile button groups */
+.button-group {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+}
+
+.button-group button {
+    min-width: auto;
+    font-size: 0.9rem;
+}
+
+/* Mobile disbursement controls */
+.disbursement-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 15px;
+}
+
+.disbursement-controls button {
+    width: 100%;
+}
+
+/* Mobile scenario management */
+.saved-scenarios {
+    grid-template-columns: 1fr;
+    gap: 8px;
+}
+
+.scenario-item {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+}
+
+.scenario-actions {
+    width: 100%;
+    justify-content: flex-end;
+}
+
+/* Mobile toast notifications */
+.toast {
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    padding: 12px 16px;
+    font-size: 0.9rem;
+    text-align: center;
+}
+
+/* Small Mobile (480px+) */
+@media (min-width: 480px) {
+    .container {
+        padding: 15px;
     }
     
     .summary-cards {
-        grid-template-columns: repeat(2, 1fr);
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .button-group {
+        grid-template-columns: repeat(3, 1fr);
+    }
+    
+    .disbursement-controls {
+        flex-direction: row;
+    }
+    
+    .disbursement-controls button {
+        width: auto;
+        flex: 1;
+    }
+    
+    .disbursement-item,
+    .prepayment-item {
+        grid-template-columns: 1fr 1fr auto;
+        gap: 15px;
+        align-items: end;
+    }
+    
+    .scenario-item {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+    
+    .scenario-actions {
+        width: auto;
+    }
+}
+
+/* Tablet (768px+) */
+@media (min-width: 768px) {
+    .container {
+        padding: 20px;
+    }
+    
+    .form-row {
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+        gap: 15px;
+    }
+    
+    .charts-section {
+        grid-template-columns: 1fr 1fr;
+        gap: 30px;
+        margin-bottom: 30px;
+    }
+    
+    .chart-container {
+        padding: 20px;
+        min-height: 400px;
+    }
+    
+    .chart-container canvas {
+        max-height: 400px;
+    }
+    
+    .disbursement-item {
+        grid-template-columns: 1fr 1fr 1fr auto;
+        align-items: end;
+    }
+    
+    .table-container {
+        max-height: 500px;
+    }
+    
+    .table-container::after {
+        display: none; /* Hide scroll indicator on larger screens */
+    }
+    
+    .saved-scenarios {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    
+    .button-group {
+        display: flex;
+        flex-wrap: wrap;
+    }
+    
+    .button-group button {
+        flex: 1;
+        min-width: 80px;
+    }
+}
+
+/* Desktop (1024px+) */
+@media (min-width: 1024px) {
+    .summary-cards {
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    }
+    
+    .chart-container canvas {
+        max-height: 450px;
+    }
+    
+    .table-container {
+        max-height: 600px;
+    }
+    
+    /* Remove sticky column on desktop */
+    table th:first-child,
+    table td:first-child {
+        position: static;
+        box-shadow: none;
+    }
+}
+
+/* Large Desktop (1200px+) */
+@media (min-width: 1200px) {
+    .charts-section {
+        gap: 40px;
+    }
+    
+    .chart-container canvas {
+        max-height: 500px;
+    }
+}
+
+/* Landscape mobile optimization */
+@media (max-height: 500px) and (orientation: landscape) {
+    header {
+        padding: 15px;
+        margin-bottom: 20px;
+    }
+    
+    header h1 {
+        font-size: 1.8rem;
+        margin-bottom: 5px;
+    }
+    
+    .chart-container {
+        min-height: 250px;
+    }
+    
+    .chart-container canvas {
+        max-height: 250px;
+    }
+    
+    .summary-cards {
+        grid-template-columns: repeat(6, 1fr);
+        gap: 8px;
+    }
+    
+    .summary-card {
+        padding: 8px;
+        min-height: 60px;
+    }
+}
+
+/* High DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    .chart-container canvas {
+        image-rendering: -webkit-optimize-contrast;
+        image-rendering: crisp-edges;
+    }
+}
+
+/* Accessibility enhancements */
+@media (prefers-reduced-motion: reduce) {
+    * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
+
+/* Focus management for better accessibility */
+.form-group input:focus,
+button:focus {
+    outline: 2px solid #3498db;
+    outline-offset: 2px;
+}
+
+/* Mobile-specific loading state */
+@media (max-width: 768px) {
+    .loading .btn-calculate {
+        font-size: 1rem;
     }
 }
 
