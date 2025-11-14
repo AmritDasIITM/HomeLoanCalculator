@@ -2,7 +2,34 @@
 
 A comprehensive progressive disbursement home loan calculator with advanced EMI calculations, prepayment analysis, and scenario management. Perfect for analyzing home loans with staggered fund releases and prepayment strategies.
 
-## ✨ Features
+## 🆕 Recent Updates (v2.1)
+
+### 🎨 **Enhanced User Interface**
+- **Consistent Light Theme**: Removed dark mode for unified, professional appearance
+- **Improved Text Visibility**: Enhanced readability with bold payment schedule text
+- **Optimized Layout**: Clean, non-overlapping design elements
+- **Better Typography**: Improved contrast and font weights throughout
+
+### 🔧 **Critical Bug Fixes**
+- **Fixed Hardcoded Display**: Resolved "₹1.55 Crore" static text not updating with loan amount changes
+- **Automatic Recalculation**: Existing disbursements now automatically update when loan amount changes
+- **Real-time Updates**: All calculations now update instantly when parameters change
+- **Dynamic Formatting**: Loan amount display now properly formats based on input
+
+### 📱 **Mobile Responsiveness Improvements**
+- **Enhanced Saved Scenarios**: Fixed overlapping issues with better grid layout
+- **Optimized Layout**: Names display on single line with buttons underneath
+- **Mobile-Friendly Tables**: Interest rate comparison table now fully responsive
+- **Touch-Friendly Interface**: Improved button sizing and spacing for mobile devices
+- **Horizontal Scrolling**: Added scroll indicators for wide tables on mobile
+
+### 🎯 **User Experience Enhancements**
+- **Saved Scenarios Layout**: Supports up to 30-character scenario names with proper ellipsis
+- **Better Spacing**: Increased minimum card width (320px) for better content display
+- **Improved Navigation**: Cleaner button positioning and action organization
+- **Enhanced Visual Feedback**: Better hover states and transitions
+
+## ✨ Core Features
 
 ### 🏗️ **Progressive Disbursement Support**
 - **Realistic Home Loan Simulation**: Models actual bank disbursement patterns
@@ -26,7 +53,7 @@ A comprehensive progressive disbursement home loan calculator with advanced EMI 
 - **Interactive Charts**: EMI breakdown and complete payment timeline
 - **Payment Schedule Table**: Detailed month-by-month breakdown
 - **Summary Cards**: Key metrics at a glance
-- **Interest Rate Comparison**: Side-by-side comparison of different rates
+- **Interest Rate Comparison**: Mobile-optimized side-by-side comparison
 
 ### 💾 **Data Management**
 - **Scenario Save/Load**: Save multiple loan scenarios with custom names
@@ -35,9 +62,9 @@ A comprehensive progressive disbursement home loan calculator with advanced EMI 
 - **Local Storage**: Persistent data across browser sessions
 
 ### 🎯 **User Experience**
-- **Professional UI**: Clean, organized interface with modern design
+- **Professional UI**: Clean, organized interface with consistent light theme
 - **Toast Notifications**: User-friendly success/error messages
-- **Responsive Design**: Works perfectly on desktop and mobile
+- **Fully Responsive**: Optimized for all screen sizes and devices
 - **Input Validation**: Comprehensive error handling and validation
 
 ## 🚀 Quick Start
@@ -205,10 +232,42 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Progressive Enhancement**: Accessible to all users
 - **Open Source**: Built with community-first mindset
 
+## 🔧 Technical Implementation Details
+
+### **Recent Fixes (v2.1)**
+
+#### **Dynamic Loan Amount Display Fix**
+- **Issue**: Hardcoded "₹1.55 Crore" text not updating with loan amount changes
+- **Solution**: Implemented `formatLoanAmount()` function with dynamic formatting
+- **Result**: Real-time updates based on actual loan amount input
+
+#### **Automatic Disbursement Recalculation**
+- **Issue**: Existing disbursements not updating when loan amount changed
+- **Solution**: Enhanced `loanAmountInput` event listener to update all disbursements
+- **Technical**: Loops through disbursements and recalculates amounts based on percentages
+
+#### **Mobile-Responsive Interest Rate Comparison**
+- **Enhancement**: Added `overflow-x: auto` to comparison table container
+- **Benefit**: Horizontal scrolling on mobile devices with scroll indicators
+- **CSS Classes**: Enhanced `.comparison-container` with mobile-first approach
+
+#### **Saved Scenarios Layout Optimization**
+- **Improvements**: 
+  - Increased minimum card width to 320px
+  - Implemented text ellipsis for names longer than 30 characters
+  - Reorganized button layout (name on top, buttons below)
+  - Enhanced grid responsiveness with better gap spacing
+
+### **Code Quality Enhancements**
+- **Event Handling**: Improved loan amount change detection
+- **DOM Updates**: More efficient real-time calculation updates  
+- **CSS Architecture**: Better mobile-first responsive design
+- **User Feedback**: Enhanced visual indicators and transitions
+
 ---
 
-**📝 Last Updated**: November 2025  
-**🔧 Version**: 2.0.0  
+**📝 Last Updated**: November 14, 2025  
+**🔧 Version**: 2.1.0  
 **👨‍💻 Status**: Production Ready
 
 *Made with ❤️ for better financial planning*

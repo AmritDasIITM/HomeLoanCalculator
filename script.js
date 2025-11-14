@@ -12,6 +12,7 @@ const elements = {
     // Basic inputs
     startDate: document.getElementById('startDate'),
     loanAmount: document.getElementById('loanAmount'),
+    loanAmountDisplay: document.getElementById('loanAmountDisplay'),
     interestRate: document.getElementById('interestRate'),
     tenure: document.getElementById('tenure'),
     extraEMI: document.getElementById('extraEMI'),
@@ -79,6 +80,21 @@ function formatMonthYear(monthNumber, startDate) {
     const start = new Date(startDate);
     start.setMonth(start.getMonth() + monthNumber);
     return start.toLocaleDateString('en-US', { year: 'numeric', month: 'short' });
+}
+
+function formatLoanAmountDisplay(amount) {
+    const crores = amount / 10000000; // 1 crore = 10,000,000
+    if (crores >= 1) {
+        return `₹${crores.toFixed(2)} Crore`;
+    } else {
+        const lakhs = amount / 100000; // 1 lakh = 100,000
+        return `₹${lakhs.toFixed(2)} Lakh`;
+    }
+}
+
+function updateLoanAmountDisplay() {
+    const amount = parseFloat(elements.loanAmount.value) || 0;
+    elements.loanAmountDisplay.textContent = formatLoanAmountDisplay(amount);
 }
 
 function calculateYearsMonths(totalMonths) {
@@ -887,8 +903,40 @@ elements.importData.addEventListener('change', importData);
 // Comparison event listener
 elements.compareRates.addEventListener('click', compareInterestRates);
 
+// Store previous loan amount for calculating existing disbursement percentages
+let previousLoanAmount = parseFloat(elements.loanAmount.value) || 15500000;
+
 // Update summaries when loan amount changes
 elements.loanAmount.addEventListener('input', () => {
+    // Update loan amount display
+    updateLoanAmountDisplay();
+    
+    const currentLoanAmount = parseFloat(elements.loanAmount.value) || 0;
+    
+    // Update individual disbursement amounts
+    const disbursementItems = document.querySelectorAll('.disbursement-item');
+    disbursementItems.forEach(item => {
+        const percentageInput = item.querySelector('.disbursement-percentage');
+        const amountInput = item.querySelector('.disbursement-amount');
+        const currentAmount = parseFloat(amountInput.value) || 0;
+        let percentage = parseFloat(percentageInput.value) || 0;
+        
+        // If percentage is not set but amount exists, calculate percentage from previous loan amount
+        if (percentage === 0 && currentAmount > 0 && previousLoanAmount > 0) {
+            percentage = (currentAmount / previousLoanAmount) * 100;
+            percentageInput.value = percentage.toFixed(2);
+        }
+        
+        // Update amount based on percentage if percentage exists
+        if (percentage > 0 && currentLoanAmount > 0) {
+            const newAmount = Math.round(currentLoanAmount * percentage / 100);
+            amountInput.value = newAmount;
+        }
+    });
+    
+    // Store current loan amount as previous for next change
+    previousLoanAmount = currentLoanAmount;
+    
     updateDisbursementSummary();
     updatePrepaymentSummary();
 });
@@ -932,6 +980,9 @@ document.addEventListener('DOMContentLoaded', function() {
             console.log('Failed to load auto-saved data');
         }
     }
+    
+    // Initialize loan amount display
+    updateLoanAmountDisplay();
     
     // Add default disbursements if none exist
     if (getDisbursements().length === 0) {

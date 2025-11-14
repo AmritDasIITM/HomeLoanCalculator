@@ -66,7 +66,7 @@
                     <div class="form-group">
                         <label for="loanAmount">Total Loan Amount (₹)</label>
                         <input type="number" id="loanAmount" value="15500000" step="100000">
-                        <small>₹1.55 Crore</small>
+                        <small id="loanAmountDisplay">₹1.55 Crore</small>
                     </div>
                     <div class="form-group">
                         <label for="interestRate">Interest Rate (%)</label>
@@ -142,18 +142,20 @@
                 </div>
                 <button type="button" id="compareRates" class="btn-secondary">Compare Interest Rates</button>
                 <div id="comparisonResults" class="comparison-results" style="display: none;">
-                    <table id="comparisonTable">
-                        <thead>
-                            <tr>
-                                <th>Rate</th>
-                                <th>EMI</th>
-                                <th>Total Interest</th>
-                                <th>Total Payment</th>
-                                <th>Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                    <div class="comparison-table-container">
+                        <table id="comparisonTable">
+                            <thead>
+                                <tr>
+                                    <th>Rate</th>
+                                    <th>EMI</th>
+                                    <th>Total Interest</th>
+                                    <th>Total Payment</th>
+                                    <th>Duration</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
                 </div>
             </section>
 
