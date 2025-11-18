@@ -159,22 +159,7 @@ HomeLoanCalculator/
 
 ## 🌐 GitHub Pages Deployment
 
-### **Automatic Deployment**
-1. **Fork/Clone** this repository
-2. **Enable GitHub Pages** in repository Settings
-3. **Select source**: Choose `main` branch
-4. **Access URL**: `https://[username].github.io/HomeLoanCalculator`
-
-### **Custom Domain (Optional)**
-1. Add `CNAME` file with your domain
-2. Configure DNS settings
-3. Enable HTTPS in GitHub Pages settings
-
-### **Performance Optimization**
-- ✅ All paths are relative
-- ✅ No server-side dependencies
-- ✅ Optimized for static hosting
-- ✅ Mobile-responsive design
+Available at: https://amritdasiitm.github.io/HomeLoanCalculator/
 
 ## 💡 Example Scenarios
 
@@ -204,28 +189,6 @@ HomeLoanCalculator/
 - Date-stamped filenames for organization
 - Cross-device compatibility
 
-## 🛠️ Development
-
-### **Local Development Setup**
-```bash
-# No build process required - pure HTML/CSS/JS
-# Simply open index.html in browser
-python -m http.server 8000  # Optional: local server
-```
-
-### **Customization**
-- **Styling**: Modify `styles.css` for custom themes
-- **Logic**: Extend `script.js` for additional features
-- **Default Values**: Update initial loan parameters
-- **Currency**: Easily adaptable to other currencies
-
-### **Contributing**
-1. Fork the repository
-2. Create feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit changes (`git commit -m 'Add AmazingFeature'`)
-4. Push to branch (`git push origin feature/AmazingFeature`)
-5. Open Pull Request
-
 ## 📄 License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
@@ -243,42 +206,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Progressive Enhancement**: Accessible to all users
 - **Open Source**: Built with community-first mindset
 
-## 🔧 Technical Implementation Details
-
-### **Recent Fixes (v2.1)**
-
-#### **Dynamic Loan Amount Display Fix**
-- **Issue**: Hardcoded "₹1.55 Crore" text not updating with loan amount changes
-- **Solution**: Implemented `formatLoanAmount()` function with dynamic formatting
-- **Result**: Real-time updates based on actual loan amount input
-
-#### **Automatic Disbursement Recalculation**
-- **Issue**: Existing disbursements not updating when loan amount changed
-- **Solution**: Enhanced `loanAmountInput` event listener to update all disbursements
-- **Technical**: Loops through disbursements and recalculates amounts based on percentages
-
-#### **Mobile-Responsive Interest Rate Comparison**
-- **Enhancement**: Added `overflow-x: auto` to comparison table container
-- **Benefit**: Horizontal scrolling on mobile devices with scroll indicators
-- **CSS Classes**: Enhanced `.comparison-container` with mobile-first approach
-
-#### **Saved Scenarios Layout Optimization**
-- **Improvements**: 
-  - Increased minimum card width to 320px
-  - Implemented text ellipsis for names longer than 30 characters
-  - Reorganized button layout (name on top, buttons below)
-  - Enhanced grid responsiveness with better gap spacing
-
-### **Code Quality Enhancements**
-- **Event Handling**: Improved loan amount change detection
-- **DOM Updates**: More efficient real-time calculation updates  
-- **CSS Architecture**: Better mobile-first responsive design
-- **User Feedback**: Enhanced visual indicators and transitions
-
----
-
-**📝 Last Updated**: November 14, 2025  
-**🔧 Version**: 2.1.0  
-**👨‍💻 Status**: Production Ready
-
 *Made with ❤️ for better financial planning*
+
