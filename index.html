@@ -148,7 +148,26 @@
 
             <!-- Disbursement Schedule Section -->
             <section class="card">
-                <h2>Disbursement Schedule</h2>
+                <h2>💰 Disbursement Schedule</h2>
+                
+                <!-- Global Disbursement Mode Toggle -->
+                <div class="global-disbursement-mode">
+                    <h3>🎛️ Global Input Mode</h3>
+                    <div class="toggle-group">
+                        <label class="toggle-option">
+                            <input type="radio" name="globalDisbursementMode" value="percentage" checked>
+                            <span>Percentage Mode</span>
+                        </label>
+                        <label class="toggle-option">
+                            <input type="radio" name="globalDisbursementMode" value="fixed">
+                            <span>Fixed Amount Mode</span>
+                        </label>
+                    </div>
+                    <small class="mode-description">
+                        <span id="modeDescription">Enter percentages, amounts auto-calculate from loan total</span>
+                    </small>
+                </div>
+                
                 <div class="disbursement-controls">
                     <button type="button" id="addDisbursement" class="btn-primary">+ Add Disbursement</button>
                     <button type="button" id="clearDisbursements" class="btn-secondary">Clear All</button>

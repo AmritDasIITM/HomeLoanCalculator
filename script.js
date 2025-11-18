@@ -72,6 +72,7 @@ const elements = {
 // Disbursement data
 let disbursements = [];
 let disbursementCounter = 0;
+let globalDisbursementMode = 'percentage'; // Global mode state
 
 // Utility functions
 function formatCurrency(amount) {
@@ -160,6 +161,7 @@ function saveCurrentScenario() {
             basePrepaymentAmount: elements.basePrepaymentAmount.value,
             prepaymentGrowthRate: elements.prepaymentGrowthRate.value,
             prepaymentGrowthType: elements.prepaymentGrowthType.value,
+            globalDisbursementMode: getGlobalDisbursementMode(),
             disbursements: getDisbursements(),
             prepayments: getPrepayments()
         }
@@ -198,6 +200,16 @@ function loadScenario(scenarioName) {
     elements.prepaymentGrowthRate.value = data.prepaymentGrowthRate || 10;
     elements.prepaymentGrowthType.value = data.prepaymentGrowthType || 'annual';
     
+    // Load global disbursement mode if saved
+    if (data.globalDisbursementMode) {
+        globalDisbursementMode = data.globalDisbursementMode;
+        const modeRadio = document.querySelector(`input[name="globalDisbursementMode"][value="${data.globalDisbursementMode}"]`);
+        if (modeRadio) {
+            modeRadio.checked = true;
+        }
+        updateModeDescription();
+    }
+    
     // Clear and load disbursements
     clearAllDisbursements();
     if (data.disbursements) {
@@ -205,11 +217,15 @@ function loadScenario(scenarioName) {
             addDisbursementRow();
             const items = document.querySelectorAll('.disbursement-item');
             const lastItem = items[items.length - 1];
+            
+            // Set basic values
             lastItem.querySelector('.disbursement-month').value = d.month;
             lastItem.querySelector('.disbursement-amount').value = d.amount;
-            const percentage = ((d.amount / parseFloat(elements.loanAmount.value)) * 100).toFixed(2);
-            lastItem.querySelector('.disbursement-percentage').value = percentage;
+            lastItem.querySelector('.disbursement-percentage').value = d.percentage || ((d.amount / parseFloat(elements.loanAmount.value)) * 100).toFixed(2);
         });
+        
+        // Apply global mode to all loaded rows
+        applyGlobalModeToAllRows();
     }
     
     // Clear and load prepayments
@@ -305,6 +321,73 @@ function importData(event) {
     event.target.value = ''; // Reset file input
 }
 
+// Global disbursement mode functions
+function getGlobalDisbursementMode() {
+    const selectedMode = document.querySelector('input[name="globalDisbursementMode"]:checked');
+    return selectedMode ? selectedMode.value : 'percentage';
+}
+
+function updateModeDescription() {
+    const modeDescription = document.getElementById('modeDescription');
+    const mode = getGlobalDisbursementMode();
+    
+    if (mode === 'percentage') {
+        modeDescription.textContent = 'Enter percentages, amounts auto-calculate from loan total';
+    } else {
+        modeDescription.textContent = 'Enter fixed amounts, percentages shown for reference';
+    }
+}
+
+function applyGlobalModeToAllRows() {
+    const disbursementItems = document.querySelectorAll('.disbursement-item');
+    disbursementItems.forEach(item => {
+        applyGlobalModeToRow(item);
+    });
+    updateDisbursementSummary();
+}
+
+function applyGlobalModeToRow(disbursementDiv) {
+    const mode = getGlobalDisbursementMode();
+    const amountInput = disbursementDiv.querySelector('.disbursement-amount');
+    const percentageInput = disbursementDiv.querySelector('.disbursement-percentage');
+    const amountLabel = disbursementDiv.querySelector('.amount-label');
+    const percentageLabel = disbursementDiv.querySelector('.percentage-label');
+    
+    if (mode === 'percentage') {
+        // Percentage mode: Amount is auto-calculated
+        amountInput.style.backgroundColor = '#f8f9fa';
+        amountInput.style.cursor = 'not-allowed';
+        amountInput.readOnly = true;
+        percentageInput.readOnly = false;
+        percentageInput.style.backgroundColor = '#fff';
+        percentageInput.style.cursor = 'text';
+        
+        amountLabel.textContent = 'Amount (₹) - Auto Calculated';
+        percentageLabel.textContent = 'Percentage (%)';
+        
+        // Recalculate amount based on percentage
+        const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+        const percentage = parseFloat(percentageInput.value) || 0;
+        amountInput.value = Math.round(totalLoan * percentage / 100);
+    } else {
+        // Fixed amount mode: Percentage is informational
+        amountInput.readOnly = false;
+        amountInput.style.backgroundColor = '#fff';
+        amountInput.style.cursor = 'text';
+        percentageInput.style.backgroundColor = '#f8f9fa';
+        percentageInput.style.cursor = 'not-allowed';
+        percentageInput.readOnly = true;
+        
+        amountLabel.textContent = 'Amount (₹) - Manual Entry';
+        percentageLabel.textContent = 'Percentage (%) - Info Only';
+        
+        // Update percentage for display
+        const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+        const amount = parseFloat(amountInput.value) || 0;
+        percentageInput.value = totalLoan > 0 ? ((amount / totalLoan) * 100).toFixed(2) : 0;
+    }
+}
+
 // Disbursement management
 function addDisbursementRow() {
     disbursementCounter++;
@@ -312,43 +395,114 @@ function addDisbursementRow() {
     disbursementDiv.className = 'disbursement-item';
     disbursementDiv.dataset.id = disbursementCounter;
     
+    // Calculate default values based on global mode
+    const defaultPercentage = 10;
+    const defaultAmount = Math.round((parseFloat(elements.loanAmount.value) || 15500000) * defaultPercentage / 100);
+    
     disbursementDiv.innerHTML = `
         <div class="form-group">
             <label>Month</label>
             <input type="number" class="disbursement-month" value="${disbursementCounter}" min="0">
         </div>
         <div class="form-group">
-            <label>Amount (₹)</label>
-            <input type="number" class="disbursement-amount" value="1550000" step="10000">
+            <label class="amount-label">Amount (₹)</label>
+            <input type="number" class="disbursement-amount" value="${defaultAmount}" step="10000">
         </div>
         <div class="form-group">
-            <label>Percentage (%)</label>
-            <input type="number" class="disbursement-percentage" value="10" step="0.1" min="0" max="100">
+            <label class="percentage-label">Percentage (%)</label>
+            <input type="number" class="disbursement-percentage" value="${defaultPercentage}" step="0.1" min="0" max="100">
         </div>
         <button type="button" class="btn-remove" onclick="removeDisbursement(${disbursementCounter})">Remove</button>
     `;
     
     elements.disbursementList.appendChild(disbursementDiv);
     
-    // Add event listeners for automatic calculations
+    // Apply global mode to the new row
+    applyGlobalModeToRow(disbursementDiv);
+    
+    // Add event listeners for calculations
+    setupDisbursementEventListeners(disbursementDiv);
+    
+    updateDisbursementSummary();
+}
+
+function setupDisbursementEventListeners(disbursementDiv) {
     const percentageInput = disbursementDiv.querySelector('.disbursement-percentage');
     const amountInput = disbursementDiv.querySelector('.disbursement-amount');
     
+    // Input handlers based on global mode
     percentageInput.addEventListener('input', function() {
-        const totalLoan = parseFloat(elements.loanAmount.value) || 0;
-        const percentage = parseFloat(this.value) || 0;
-        amountInput.value = Math.round(totalLoan * percentage / 100);
-        updateDisbursementSummary();
+        const mode = getGlobalDisbursementMode();
+        if (mode === 'percentage') {
+            const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+            const percentage = parseFloat(this.value) || 0;
+            amountInput.value = Math.round(totalLoan * percentage / 100);
+            updateDisbursementSummary();
+        }
     });
     
     amountInput.addEventListener('input', function() {
-        const totalLoan = parseFloat(elements.loanAmount.value) || 0;
-        const amount = parseFloat(this.value) || 0;
-        percentageInput.value = ((amount / totalLoan) * 100).toFixed(2);
+        const mode = getGlobalDisbursementMode();
+        if (mode === 'fixed') {
+            // In fixed mode, update percentage for display only
+            const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+            const amount = parseFloat(this.value) || 0;
+            percentageInput.value = totalLoan > 0 ? ((amount / totalLoan) * 100).toFixed(2) : 0;
+        } else {
+            // In percentage mode, sync percentage when amount changes
+            const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+            const amount = parseFloat(this.value) || 0;
+            percentageInput.value = ((amount / totalLoan) * 100).toFixed(2);
+        }
         updateDisbursementSummary();
     });
+}
+
+function getSelectedDisbursementMode(disbursementDiv) {
+    const selectedMode = disbursementDiv.querySelector('.disbursement-mode:checked');
+    return selectedMode ? selectedMode.value : 'percentage';
+}
+
+function updateDisbursementInputMode(disbursementDiv) {
+    const mode = getSelectedDisbursementMode(disbursementDiv);
+    const amountInput = disbursementDiv.querySelector('.disbursement-amount');
+    const percentageInput = disbursementDiv.querySelector('.disbursement-percentage');
+    const amountLabel = disbursementDiv.querySelector('.amount-label');
+    const percentageLabel = disbursementDiv.querySelector('.percentage-label');
     
-    updateDisbursementSummary();
+    if (mode === 'percentage') {
+        // Percentage mode: Amount is auto-calculated
+        amountInput.style.backgroundColor = '#f8f9fa';
+        amountInput.style.cursor = 'not-allowed';
+        amountInput.readOnly = true;
+        percentageInput.readOnly = false;
+        percentageInput.style.backgroundColor = '#fff';
+        percentageInput.style.cursor = 'text';
+        
+        amountLabel.textContent = 'Amount (₹) - Auto Calculated';
+        percentageLabel.textContent = 'Percentage (%)';
+        
+        // Recalculate amount based on percentage
+        const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+        const percentage = parseFloat(percentageInput.value) || 0;
+        amountInput.value = Math.round(totalLoan * percentage / 100);
+    } else {
+        // Fixed amount mode: Percentage is informational
+        amountInput.readOnly = false;
+        amountInput.style.backgroundColor = '#fff';
+        amountInput.style.cursor = 'text';
+        percentageInput.style.backgroundColor = '#f8f9fa';
+        percentageInput.style.cursor = 'not-allowed';
+        percentageInput.readOnly = true;
+        
+        amountLabel.textContent = 'Amount (₹) - Manual Entry';
+        percentageLabel.textContent = 'Percentage (%) - Info Only';
+        
+        // Update percentage for display
+        const totalLoan = parseFloat(elements.loanAmount.value) || 0;
+        const amount = parseFloat(amountInput.value) || 0;
+        percentageInput.value = totalLoan > 0 ? ((amount / totalLoan) * 100).toFixed(2) : 0;
+    }
 }
 
 function removeDisbursement(id) {
@@ -388,8 +542,10 @@ function getDisbursements() {
     disbursementItems.forEach(item => {
         const month = parseInt(item.querySelector('.disbursement-month').value) || 0;
         const amount = parseFloat(item.querySelector('.disbursement-amount').value) || 0;
+        const mode = getSelectedDisbursementMode(item);
+        const percentage = parseFloat(item.querySelector('.disbursement-percentage').value) || 0;
         
-        disbursements.push({ month, amount });
+        disbursements.push({ month, amount, mode, percentage });
     });
     
     // Sort by month
@@ -1805,24 +1961,31 @@ elements.loanAmount.addEventListener('input', () => {
     
     const currentLoanAmount = parseFloat(elements.loanAmount.value) || 0;
     
-    // Update individual disbursement amounts
+    // Update individual disbursement amounts based on their mode
     const disbursementItems = document.querySelectorAll('.disbursement-item');
     disbursementItems.forEach(item => {
+        const mode = getSelectedDisbursementMode(item);
         const percentageInput = item.querySelector('.disbursement-percentage');
         const amountInput = item.querySelector('.disbursement-amount');
         const currentAmount = parseFloat(amountInput.value) || 0;
         let percentage = parseFloat(percentageInput.value) || 0;
         
-        // If percentage is not set but amount exists, calculate percentage from previous loan amount
-        if (percentage === 0 && currentAmount > 0 && previousLoanAmount > 0) {
-            percentage = (currentAmount / previousLoanAmount) * 100;
-            percentageInput.value = percentage.toFixed(2);
-        }
-        
-        // Update amount based on percentage if percentage exists
-        if (percentage > 0 && currentLoanAmount > 0) {
-            const newAmount = Math.round(currentLoanAmount * percentage / 100);
-            amountInput.value = newAmount;
+        if (mode === 'percentage') {
+            // In percentage mode, update amount based on percentage
+            if (percentage === 0 && currentAmount > 0 && previousLoanAmount > 0) {
+                percentage = (currentAmount / previousLoanAmount) * 100;
+                percentageInput.value = percentage.toFixed(2);
+            }
+            
+            if (percentage > 0 && currentLoanAmount > 0) {
+                const newAmount = Math.round(currentLoanAmount * percentage / 100);
+                amountInput.value = newAmount;
+            }
+        } else {
+            // In fixed mode, keep amount unchanged but update percentage display
+            if (currentLoanAmount > 0) {
+                percentageInput.value = ((currentAmount / currentLoanAmount) * 100).toFixed(2);
+            }
         }
     });
     
@@ -1856,8 +2019,21 @@ function autoSave() {
     element.addEventListener('input', autoSave);
 });
 
-// Initialize with default disbursements and load auto-saved data
+// Global disbursement mode event listeners
 document.addEventListener('DOMContentLoaded', function() {
+    // Add global disbursement mode change listeners
+    const globalModeRadios = document.querySelectorAll('input[name="globalDisbursementMode"]');
+    globalModeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            globalDisbursementMode = this.value;
+            updateModeDescription();
+            applyGlobalModeToAllRows();
+        });
+    });
+    
+    // Initialize mode description
+    updateModeDescription();
+    
     // Load auto-saved data
     const autoSavedData = localStorage.getItem('autoSave');
     if (autoSavedData) {
@@ -1868,6 +2044,16 @@ document.addEventListener('DOMContentLoaded', function() {
             elements.interestRate.value = data.interestRate || 7.65;
             elements.tenure.value = data.tenure || 25;
             elements.extraEMI.value = data.extraEMI || 0;
+            
+            // Load global disbursement mode if saved
+            if (data.globalDisbursementMode) {
+                globalDisbursementMode = data.globalDisbursementMode;
+                const modeRadio = document.querySelector(`input[name="globalDisbursementMode"][value="${data.globalDisbursementMode}"]`);
+                if (modeRadio) {
+                    modeRadio.checked = true;
+                }
+                updateModeDescription();
+            }
         } catch (e) {
             console.log('Failed to load auto-saved data');
         }

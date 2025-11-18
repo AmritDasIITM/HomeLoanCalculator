@@ -154,7 +154,7 @@ header p {
 
 .disbursement-item {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr auto;
+    grid-template-columns: 1fr 1fr 1fr 1fr auto;
     gap: 15px;
     align-items: end;
     padding: 15px;
@@ -166,6 +166,59 @@ header p {
 
 .disbursement-item .form-group {
     margin-bottom: 0;
+}
+
+/* Input Mode Toggle */
+.input-mode-toggle {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 0.25rem;
+}
+
+.mode-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.25rem 0.5rem;
+    border-radius: 4px;
+    transition: background-color 0.2s ease;
+    font-size: 0.85rem;
+}
+
+.mode-option:hover {
+    background-color: #e9ecef;
+}
+
+.mode-option input[type="radio"] {
+    margin-right: 0.5rem;
+    accent-color: #3498db;
+    transform: scale(0.9);
+}
+
+.mode-option span {
+    color: #495057;
+    font-weight: 500;
+}
+
+.mode-option input[type="radio"]:checked + span {
+    color: #3498db;
+    font-weight: 600;
+}
+
+/* Disbursement input field styling based on mode */
+.disbursement-item input[readonly] {
+    background-color: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+    color: #6c757d !important;
+    cursor: not-allowed !important;
+}
+
+.disbursement-item input:not([readonly]) {
+    background-color: #fff !important;
+    border-color: #ced4da !important;
+    color: #495057 !important;
+    cursor: text !important;
 }
 
 .btn-remove {
@@ -1566,6 +1619,56 @@ button:focus {
 .construction-row {
     background-color: #fff3cd !important;
     border-left: 4px solid #ffc107;
+}
+
+/* Global Disbursement Mode Styling */
+.global-disbursement-mode {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.global-disbursement-mode h3 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.mode-description {
+    display: block;
+    color: #6c757d;
+    font-size: 0.9rem;
+    margin-top: 0.75rem;
+    font-style: italic;
+    text-align: center;
+}
+
+.toggle-option:has(input[value="percentage"]:checked) ~ .mode-description #modeDescription {
+    color: #3498db;
+}
+
+.toggle-option:has(input[value="fixed"]:checked) ~ .mode-description #modeDescription {
+    color: #e67e22;
+}
+
+/* Mobile responsiveness for global mode */
+@media (max-width: 768px) {
+    .global-disbursement-mode {
+        padding: 1rem;
+    }
+    
+    .global-disbursement-mode .toggle-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .global-disbursement-mode .toggle-option {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* Loading state */
