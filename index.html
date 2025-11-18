@@ -79,6 +79,73 @@
                 </div>
             </section>
 
+            <!-- EMI Method Selection -->
+            <section class="card">
+                <h2>🏗️ EMI Calculation Method</h2>
+                
+                <!-- EMI Method Selection -->
+                <div class="emi-method-section">
+                    <h3>📋 Construction Period EMI Options</h3>
+                    
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="constructionPeriod">Construction Period (Months)</label>
+                            <input type="number" id="constructionPeriod" value="18" min="1" max="60" step="1">
+                            <small>Duration during which disbursements occur</small>
+                        </div>
+                        <div class="form-group">
+                            <label>Results View</label>
+                            <div class="toggle-group">
+                                <label class="toggle-option">
+                                    <input type="radio" name="resultsView" value="individual" checked>
+                                    <span>Individual Results</span>
+                                </label>
+                                <label class="toggle-option">
+                                    <input type="radio" name="resultsView" value="comparison">
+                                    <span>Side-by-Side Comparison</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="emi-methods">
+                        <div class="emi-method-option">
+                            <div class="method-header">
+                                <label class="method-selector">
+                                    <input type="radio" name="emiMethod" value="preemi" checked>
+                                    <span class="method-title">Pre-EMI (Interest Only)</span>
+                                </label>
+                            </div>
+                            <div class="method-description">
+                                <p>💡 <strong>How it works:</strong> Pay only interest on disbursed amounts during construction period. Full EMI starts after construction completion.</p>
+                                <ul>
+                                    <li>✅ Lower cash flow during construction</li>
+                                    <li>⚠️ Higher total interest cost</li>
+                                    <li>📅 Suitable for income starting post-completion</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="emi-method-option">
+                            <div class="method-header">
+                                <label class="method-selector">
+                                    <input type="radio" name="emiMethod" value="fullemi">
+                                    <span class="method-title">Full EMI from Day One</span>
+                                </label>
+                            </div>
+                            <div class="method-description">
+                                <p>💡 <strong>How it works:</strong> Pay full EMI as if entire loan is disbursed. Excess EMI reduces principal amount immediately.</p>
+                                <ul>
+                                    <li>💰 Lower total interest cost</li>
+                                    <li>⚠️ Higher cash flow during construction</li>
+                                    <li>📈 Faster loan closure</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
             <!-- Disbursement Schedule Section -->
             <section class="card">
                 <h2>Disbursement Schedule</h2>
@@ -98,16 +165,47 @@
             <!-- Prepayment Schedule Section -->
             <section class="card">
                 <h2>💰 Prepayment Schedule</h2>
+                
+                <!-- Base Prepayment Configuration -->
+                <div class="prepayment-config">
+                    <h3>📈 Prepayment Parameters</h3>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="basePrepaymentAmount">Base Prepayment Amount (₹)</label>
+                            <input type="number" id="basePrepaymentAmount" value="200000" step="10000" min="0">
+                            <small>Starting amount for first prepayment</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="prepaymentGrowthRate">Annual Growth Rate (%)</label>
+                            <input type="number" id="prepaymentGrowthRate" value="10" step="0.1" min="0" max="50">
+                            <small>Yearly increase in prepayment amount</small>
+                        </div>
+                        <div class="form-group">
+                            <label for="prepaymentGrowthType">Growth Type</label>
+                            <select id="prepaymentGrowthType">
+                                <option value="annual">Annual Growth</option>
+                                <option value="monthly">Monthly Compound</option>
+                            </select>
+                            <small>How growth is calculated</small>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Prepayment Controls -->
                 <div class="disbursement-controls">
                     <button type="button" id="addPrepayment" class="btn-primary">+ Add Prepayment</button>
                     <button type="button" id="clearPrepayments" class="btn-secondary">Clear All</button>
+                    <button type="button" id="recalculatePrepayments" class="btn-secondary">🔄 Recalculate Amounts</button>
                 </div>
+                
                 <div id="prepaymentList" class="disbursement-list">
                     <!-- Prepayments will be added here dynamically -->
                 </div>
+                
                 <div class="disbursement-summary">
                     <span>Total Extra Payments: ₹<span id="totalPrepayments">0</span></span>
                     <span>Number of Prepayments: <span id="prepaymentCount">0</span></span>
+                    <span>Average Prepayment: ₹<span id="averagePrepayment">0</span></span>
                 </div>
             </section>
 

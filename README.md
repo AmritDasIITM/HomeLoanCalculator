@@ -2,36 +2,47 @@
 
 A comprehensive progressive disbursement home loan calculator with advanced EMI calculations, prepayment analysis, and scenario management. Perfect for analyzing home loans with staggered fund releases and prepayment strategies.
 
-## 🆕 Recent Updates (v2.1)
+## 🆕 Recent Updates (v3.0) - Major EMI Method Enhancement
+
+### 🚀 **New EMI Method Comparison System**
+- **Dual EMI Methods**: Choose between Pre-EMI (interest-only during construction) and Full EMI (complete EMI from day one)
+- **Side-by-Side Comparison**: Comprehensive comparison view showing both methods simultaneously
+- **Construction Period Configuration**: Set specific construction period (default 18 months)
+- **Results View Toggle**: Switch between individual method view and comparison analysis
+
+### 💰 **Advanced Financial Analysis**
+- **Cash Flow Analysis**: Compare construction period cash flow requirements between methods
+- **Break-Even Calculation**: Determine when Full EMI method becomes financially advantageous
+- **Total Interest Comparison**: See exact interest savings/costs for each method
+- **Tenure Impact Analysis**: Understand how each method affects loan duration
+
+### 📊 **Enhanced Visualization**
+- **Comparison Charts**: Side-by-side breakdown charts for both EMI methods
+- **Timeline Comparison**: Dual timeline showing payment patterns and outstanding balances
+- **Construction Period Highlighting**: Visual distinction for construction vs regular EMI periods
+- **Comprehensive Comparison Tables**: Detailed month-by-month comparison with savings indicators
+
+### 🧮 **Intelligent Prepayment System**
+- **Auto-Calculated Prepayments**: Prepayment amounts calculated based on growth rate and time
+- **Growth Rate Options**: Annual or monthly compounding for prepayment escalation
+- **Base Amount Configuration**: Set starting prepayment amount with automatic growth
+- **Real-Time Recalculation**: Instant updates when base parameters change
 
 ### 🎨 **Enhanced User Interface**
-- **Consistent Light Theme**: Removed dark mode for unified, professional appearance
-- **Improved Text Visibility**: Enhanced readability with bold payment schedule text
-- **Optimized Layout**: Clean, non-overlapping design elements
-- **Better Typography**: Improved contrast and font weights throughout
+- **Method Selection Cards**: Intuitive visual selection between Pre-EMI and Full EMI methods
+- **Professional Styling**: Clean, modern interface with improved readability
+- **Mobile-Optimized Comparison**: Responsive design for complex comparison views
+- **Interactive Elements**: Better hover states and visual feedback throughout
 
-### 🔧 **Critical Bug Fixes**
-- **Fixed Hardcoded Display**: Resolved "₹1.55 Crore" static text not updating with loan amount changes
-- **Automatic Recalculation**: Existing disbursements now automatically update when loan amount changes
-- **Real-time Updates**: All calculations now update instantly when parameters change
-- **Dynamic Formatting**: Loan amount display now properly formats based on input
-
-### 📱 **Mobile Responsiveness Improvements**
-- **Enhanced Saved Scenarios**: Fixed overlapping issues with better grid layout
-- **Optimized Layout**: Names display on single line with buttons underneath
-- **Mobile-Friendly Tables**: Interest rate comparison table now fully responsive
-- **Touch-Friendly Interface**: Improved button sizing and spacing for mobile devices
-- **Horizontal Scrolling**: Added scroll indicators for wide tables on mobile
-
-### 🎯 **User Experience Enhancements**
-- **Saved Scenarios Layout**: Supports up to 30-character scenario names with proper ellipsis
-- **Better Spacing**: Increased minimum card width (320px) for better content display
-- **Improved Navigation**: Cleaner button positioning and action organization
-- **Enhanced Visual Feedback**: Better hover states and transitions
+### 🔧 **Technical Improvements**
+- **Robust Calculation Engine**: Separate calculation logic for each EMI method
+- **Enhanced Save/Load**: Support for new EMI method parameters in scenarios
+- **Improved Performance**: Optimized calculations for complex comparison scenarios
+- **Better Error Handling**: Comprehensive validation and user feedback
 
 ## ✨ Core Features
 
-### 🏗️ **Progressive Disbursement Support**
+### �️ **Progressive Disbursement Support**
 - **Realistic Home Loan Simulation**: Models actual bank disbursement patterns
 - **Multiple Disbursements**: Add unlimited disbursement schedules
 - **Percentage-Based Calculations**: Easy percentage to amount conversions

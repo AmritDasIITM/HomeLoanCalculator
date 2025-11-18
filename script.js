@@ -17,6 +17,11 @@ const elements = {
     tenure: document.getElementById('tenure'),
     extraEMI: document.getElementById('extraEMI'),
     
+    // EMI Method controls
+    constructionPeriod: document.getElementById('constructionPeriod'),
+    emiMethodRadios: document.querySelectorAll('input[name="emiMethod"]'),
+    resultsViewRadios: document.querySelectorAll('input[name="resultsView"]'),
+    
     // Disbursement controls
     addDisbursement: document.getElementById('addDisbursement'),
     clearDisbursements: document.getElementById('clearDisbursements'),
@@ -25,11 +30,16 @@ const elements = {
     remainingAmount: document.getElementById('remainingAmount'),
     
     // Prepayment controls
+    basePrepaymentAmount: document.getElementById('basePrepaymentAmount'),
+    prepaymentGrowthRate: document.getElementById('prepaymentGrowthRate'),
+    prepaymentGrowthType: document.getElementById('prepaymentGrowthType'),
     addPrepayment: document.getElementById('addPrepayment'),
     clearPrepayments: document.getElementById('clearPrepayments'),
+    recalculatePrepayments: document.getElementById('recalculatePrepayments'),
     prepaymentList: document.getElementById('prepaymentList'),
     totalPrepayments: document.getElementById('totalPrepayments'),
     prepaymentCount: document.getElementById('prepaymentCount'),
+    averagePrepayment: document.getElementById('averagePrepayment'),
     
     // Save/Load controls
     scenarioName: document.getElementById('scenarioName'),
@@ -147,6 +157,9 @@ function saveCurrentScenario() {
             interestRate: elements.interestRate.value,
             tenure: elements.tenure.value,
             extraEMI: elements.extraEMI.value,
+            basePrepaymentAmount: elements.basePrepaymentAmount.value,
+            prepaymentGrowthRate: elements.prepaymentGrowthRate.value,
+            prepaymentGrowthType: elements.prepaymentGrowthType.value,
             disbursements: getDisbursements(),
             prepayments: getPrepayments()
         }
@@ -179,6 +192,11 @@ function loadScenario(scenarioName) {
     elements.tenure.value = data.tenure || 25;
     elements.extraEMI.value = data.extraEMI || 0;
     elements.scenarioName.value = scenario.name;
+    
+    // Load prepayment parameters
+    elements.basePrepaymentAmount.value = data.basePrepaymentAmount || 200000;
+    elements.prepaymentGrowthRate.value = data.prepaymentGrowthRate || 10;
+    elements.prepaymentGrowthType.value = data.prepaymentGrowthType || 'annual';
     
     // Clear and load disbursements
     clearAllDisbursements();
@@ -378,32 +396,81 @@ function getDisbursements() {
     return disbursements.sort((a, b) => a.month - b.month);
 }
 
-// Prepayment management
+// Enhanced Prepayment Management with Auto-Calculation
+function calculatePrepaymentAmount(month, baseAmount, growthRate, growthType) {
+    if (month <= 0 || baseAmount <= 0) return baseAmount;
+    
+    const yearsFromStart = month / 12;
+    const annualGrowthDecimal = growthRate / 100;
+    
+    if (growthType === 'monthly') {
+        // Monthly compound: (1 + annual_rate/12)^months
+        const monthlyGrowthRate = annualGrowthDecimal / 12;
+        return baseAmount * Math.pow(1 + monthlyGrowthRate, month);
+    } else {
+        // Annual growth: base_amount * (1 + growth_rate)^years
+        return baseAmount * Math.pow(1 + annualGrowthDecimal, yearsFromStart);
+    }
+}
+
 function addPrepaymentRow() {
     prepaymentCounter++;
     const prepaymentDiv = document.createElement('div');
     prepaymentDiv.className = 'prepayment-item';
     prepaymentDiv.dataset.id = prepaymentCounter;
     
+    // Calculate initial amount based on current parameters
+    const month = 12; // Default month
+    const baseAmount = parseFloat(elements.basePrepaymentAmount.value) || 200000;
+    const growthRate = parseFloat(elements.prepaymentGrowthRate.value) || 10;
+    const growthType = elements.prepaymentGrowthType.value || 'annual';
+    const calculatedAmount = calculatePrepaymentAmount(month, baseAmount, growthRate, growthType);
+    
     prepaymentDiv.innerHTML = `
         <div class="form-group">
             <label>Month</label>
-            <input type="number" class="prepayment-month" value="12" min="1">
+            <input type="number" class="prepayment-month" value="${month}" min="1">
         </div>
         <div class="form-group">
-            <label>Amount (₹)</label>
-            <input type="number" class="prepayment-amount" value="100000" step="10000">
+            <label>Amount (₹) - Auto Calculated</label>
+            <input type="number" class="prepayment-amount" value="${Math.round(calculatedAmount)}" step="10000" readonly>
+            <small class="calculated-amount-info">Based on base amount and growth rate</small>
         </div>
         <button type="button" class="btn-remove" onclick="removePrepayment(${prepaymentCounter})">Remove</button>
     `;
     
     elements.prepaymentList.appendChild(prepaymentDiv);
     
-    // Add event listener for summary update
-    const amountInput = prepaymentDiv.querySelector('.prepayment-amount');
-    amountInput.addEventListener('input', updatePrepaymentSummary);
+    // Add event listener for month changes to recalculate amount
+    const monthInput = prepaymentDiv.querySelector('.prepayment-month');
+    monthInput.addEventListener('input', function() {
+        updateSinglePrepaymentAmount(prepaymentDiv);
+        updatePrepaymentSummary();
+    });
     
     updatePrepaymentSummary();
+}
+
+function updateSinglePrepaymentAmount(prepaymentDiv) {
+    const monthInput = prepaymentDiv.querySelector('.prepayment-month');
+    const amountInput = prepaymentDiv.querySelector('.prepayment-amount');
+    
+    const month = parseInt(monthInput.value) || 1;
+    const baseAmount = parseFloat(elements.basePrepaymentAmount.value) || 200000;
+    const growthRate = parseFloat(elements.prepaymentGrowthRate.value) || 10;
+    const growthType = elements.prepaymentGrowthType.value || 'annual';
+    
+    const calculatedAmount = calculatePrepaymentAmount(month, baseAmount, growthRate, growthType);
+    amountInput.value = Math.round(calculatedAmount);
+}
+
+function recalculateAllPrepaymentAmounts() {
+    const prepaymentItems = document.querySelectorAll('.prepayment-item');
+    prepaymentItems.forEach(item => {
+        updateSinglePrepaymentAmount(item);
+    });
+    updatePrepaymentSummary();
+    showToast('Prepayment amounts recalculated!', 'success');
 }
 
 function removePrepayment(id) {
@@ -423,14 +490,18 @@ function clearAllPrepayments() {
 function updatePrepaymentSummary() {
     const prepaymentItems = document.querySelectorAll('.prepayment-item');
     let totalPrepayments = 0;
+    let count = prepaymentItems.length;
     
     prepaymentItems.forEach(item => {
         const amount = parseFloat(item.querySelector('.prepayment-amount').value) || 0;
         totalPrepayments += amount;
     });
     
+    const averagePrepayment = count > 0 ? totalPrepayments / count : 0;
+    
     elements.totalPrepayments.textContent = formatNumber(totalPrepayments);
-    elements.prepaymentCount.textContent = prepaymentItems.length;
+    elements.prepaymentCount.textContent = count;
+    elements.averagePrepayment.textContent = formatNumber(Math.round(averagePrepayment));
 }
 
 function getPrepayments() {
@@ -506,7 +577,316 @@ function compareInterestRates() {
     elements.comparisonResults.style.display = 'block';
 }
 
-// Loan calculation functions
+// Helper functions for EMI method selection
+function getSelectedEMIMethod() {
+    const selectedMethod = document.querySelector('input[name="emiMethod"]:checked');
+    return selectedMethod ? selectedMethod.value : 'preemi';
+}
+
+function getSelectedResultsView() {
+    const selectedView = document.querySelector('input[name="resultsView"]:checked');
+    return selectedView ? selectedView.value : 'individual';
+}
+
+// Pre-EMI Loan Calculation (Interest-Only during construction)
+function calculatePreEMILoan() {
+    const loanAmount = parseFloat(elements.loanAmount.value);
+    const annualRate = parseFloat(elements.interestRate.value);
+    const tenureYears = parseInt(elements.tenure.value);
+    const extraEMI = parseFloat(elements.extraEMI.value) || 0;
+    const constructionPeriod = parseInt(elements.constructionPeriod.value) || 18;
+    const startDate = elements.startDate.value;
+    
+    const monthlyRate = annualRate / (12 * 100);
+    const originalTotalMonths = tenureYears * 12;
+    
+    const disbursements = getDisbursements();
+    const prepayments = getPrepayments();
+    
+    if (disbursements.length === 0) {
+        alert('Please add at least one disbursement to calculate the loan schedule.');
+        return null;
+    }
+    
+    let schedule = [];
+    let currentPrincipal = 0;
+    let totalInterestPaid = 0;
+    let totalPrincipalPaid = 0;
+    let fullEMI = 0;
+    
+    // Calculate full EMI based on total loan amount (for post-construction period)
+    fullEMI = calculateEMI(loanAmount, annualRate, tenureYears);
+    
+    // Find the maximum month that has any activity
+    const maxActivityMonth = Math.max(
+        disbursements.length > 0 ? Math.max(...disbursements.map(d => d.month)) : 0,
+        prepayments.length > 0 ? Math.max(...prepayments.map(p => p.month)) : 0,
+        originalTotalMonths + constructionPeriod
+    );
+    
+    for (let month = 0; month <= maxActivityMonth + 12; month++) {
+        let disbursedThisMonth = 0;
+        let prepaymentThisMonth = 0;
+        
+        // Check for disbursements in this month
+        disbursements.forEach(disbursement => {
+            if (disbursement.month === month) {
+                disbursedThisMonth += disbursement.amount;
+                currentPrincipal += disbursement.amount;
+            }
+        });
+        
+        // Check for prepayments in this month
+        prepayments.forEach(prepayment => {
+            if (prepayment.month === month) {
+                prepaymentThisMonth += prepayment.amount;
+            }
+        });
+        
+        // Handle initial month (month 0)
+        if (month === 0) {
+            schedule.push({
+                month: 0,
+                date: formatMonthYear(0, startDate),
+                disbursement: disbursedThisMonth,
+                prepayment: prepaymentThisMonth,
+                emi: 0,
+                interest: 0,
+                principal: 0,
+                balance: currentPrincipal,
+                cumulativeInterest: 0,
+                isConstruction: true
+            });
+            continue;
+        }
+        
+        // Skip if no principal balance
+        if (currentPrincipal <= 0) {
+            break;
+        }
+        
+        let actualEMI = 0;
+        let interestPayment = 0;
+        let principalPayment = 0;
+        
+        // During construction period - Pay only interest
+        if (month <= constructionPeriod) {
+            interestPayment = currentPrincipal * monthlyRate;
+            principalPayment = prepaymentThisMonth; // Only prepayments reduce principal
+            actualEMI = interestPayment;
+            
+            schedule.push({
+                month: month,
+                date: formatMonthYear(month, startDate),
+                disbursement: disbursedThisMonth,
+                prepayment: prepaymentThisMonth,
+                emi: actualEMI,
+                interest: interestPayment,
+                principal: principalPayment,
+                balance: currentPrincipal - principalPayment,
+                cumulativeInterest: totalInterestPaid + interestPayment,
+                isConstruction: true
+            });
+        } else {
+            // Post-construction - Full EMI
+            const totalEMI = fullEMI + extraEMI;
+            interestPayment = currentPrincipal * monthlyRate;
+            let principalFromEMI = totalEMI - interestPayment;
+            
+            // Handle final payment
+            if (currentPrincipal < totalEMI) {
+                actualEMI = currentPrincipal + interestPayment;
+                principalFromEMI = currentPrincipal;
+            } else {
+                actualEMI = totalEMI;
+            }
+            
+            principalPayment = principalFromEMI + prepaymentThisMonth;
+            
+            // Ensure principal payment doesn't exceed remaining balance
+            if (principalPayment > currentPrincipal) {
+                principalPayment = currentPrincipal;
+            }
+            
+            schedule.push({
+                month: month,
+                date: formatMonthYear(month, startDate),
+                disbursement: disbursedThisMonth,
+                prepayment: prepaymentThisMonth,
+                emi: actualEMI,
+                interest: interestPayment,
+                principal: principalPayment,
+                balance: currentPrincipal - principalPayment,
+                cumulativeInterest: totalInterestPaid + interestPayment,
+                isConstruction: false
+            });
+        }
+        
+        // Update totals
+        currentPrincipal -= principalPayment;
+        totalInterestPaid += interestPayment;
+        totalPrincipalPaid += principalPayment;
+        
+        // Loan is fully paid
+        if (currentPrincipal <= 1) {
+            break;
+        }
+        
+        // Safety check
+        if (month > originalTotalMonths + constructionPeriod + 120) {
+            break;
+        }
+    }
+    
+    return {
+        schedule: schedule,
+        totalInterest: totalInterestPaid,
+        totalPayment: loanAmount + totalInterestPaid,
+        actualTenure: schedule.length - 1,
+        currentEMI: fullEMI + extraEMI,
+        startDate: startDate,
+        method: 'preemi'
+    };
+}
+
+// Full EMI Loan Calculation (Full EMI from day one)
+function calculateFullEMILoan() {
+    const loanAmount = parseFloat(elements.loanAmount.value);
+    const annualRate = parseFloat(elements.interestRate.value);
+    const tenureYears = parseInt(elements.tenure.value);
+    const extraEMI = parseFloat(elements.extraEMI.value) || 0;
+    const constructionPeriod = parseInt(elements.constructionPeriod.value) || 18;
+    const startDate = elements.startDate.value;
+    
+    const monthlyRate = annualRate / (12 * 100);
+    const originalTotalMonths = tenureYears * 12;
+    
+    const disbursements = getDisbursements();
+    const prepayments = getPrepayments();
+    
+    if (disbursements.length === 0) {
+        alert('Please add at least one disbursement to calculate the loan schedule.');
+        return null;
+    }
+    
+    let schedule = [];
+    let outstandingPrincipal = loanAmount; // Start with full loan amount
+    let totalInterestPaid = 0;
+    let totalPrincipalPaid = 0;
+    let fullEMI = 0;
+    
+    // Calculate full EMI based on total loan amount
+    fullEMI = calculateEMI(loanAmount, annualRate, tenureYears);
+    
+    // Find the maximum month that has any activity
+    const maxActivityMonth = Math.max(
+        disbursements.length > 0 ? Math.max(...disbursements.map(d => d.month)) : 0,
+        prepayments.length > 0 ? Math.max(...prepayments.map(p => p.month)) : 0,
+        originalTotalMonths
+    );
+    
+    for (let month = 0; month <= maxActivityMonth + 12; month++) {
+        let disbursedThisMonth = 0;
+        let prepaymentThisMonth = 0;
+        
+        // Check for disbursements in this month
+        disbursements.forEach(disbursement => {
+            if (disbursement.month === month) {
+                disbursedThisMonth += disbursement.amount;
+            }
+        });
+        
+        // Check for prepayments in this month
+        prepayments.forEach(prepayment => {
+            if (prepayment.month === month) {
+                prepaymentThisMonth += prepayment.amount;
+            }
+        });
+        
+        // Handle initial month (month 0)
+        if (month === 0) {
+            schedule.push({
+                month: 0,
+                date: formatMonthYear(0, startDate),
+                disbursement: disbursedThisMonth,
+                prepayment: prepaymentThisMonth,
+                emi: 0,
+                interest: 0,
+                principal: 0,
+                balance: outstandingPrincipal,
+                cumulativeInterest: 0,
+                isConstruction: month <= constructionPeriod
+            });
+            continue;
+        }
+        
+        // Skip if no outstanding balance
+        if (outstandingPrincipal <= 0) {
+            break;
+        }
+        
+        // Calculate interest on current outstanding amount
+        const interestPayment = outstandingPrincipal * monthlyRate;
+        const totalEMI = fullEMI + extraEMI;
+        
+        let principalFromEMI = totalEMI - interestPayment;
+        let actualEMI = totalEMI;
+        
+        // Handle final payment
+        if (outstandingPrincipal < totalEMI) {
+            actualEMI = outstandingPrincipal + interestPayment;
+            principalFromEMI = outstandingPrincipal;
+        }
+        
+        // Add prepayment to principal reduction
+        let totalPrincipalPayment = principalFromEMI + prepaymentThisMonth;
+        
+        // Ensure total principal payment doesn't exceed remaining balance
+        if (totalPrincipalPayment > outstandingPrincipal) {
+            totalPrincipalPayment = outstandingPrincipal;
+        }
+        
+        // Update balances
+        outstandingPrincipal -= totalPrincipalPayment;
+        totalInterestPaid += interestPayment;
+        totalPrincipalPaid += totalPrincipalPayment;
+        
+        schedule.push({
+            month: month,
+            date: formatMonthYear(month, startDate),
+            disbursement: disbursedThisMonth,
+            prepayment: prepaymentThisMonth,
+            emi: actualEMI,
+            interest: interestPayment,
+            principal: totalPrincipalPayment,
+            balance: outstandingPrincipal,
+            cumulativeInterest: totalInterestPaid,
+            isConstruction: month <= constructionPeriod
+        });
+        
+        // Loan is fully paid
+        if (outstandingPrincipal <= 1) {
+            break;
+        }
+        
+        // Safety check
+        if (month > originalTotalMonths + 120) {
+            break;
+        }
+    }
+    
+    return {
+        schedule: schedule,
+        totalInterest: totalInterestPaid,
+        totalPayment: loanAmount + totalInterestPaid,
+        actualTenure: schedule.length - 1,
+        currentEMI: fullEMI + extraEMI,
+        startDate: startDate,
+        method: 'fullemi'
+    };
+}
+
+// Legacy function for backward compatibility
 function calculateProgressiveLoan() {
     const loanAmount = parseFloat(elements.loanAmount.value);
     const annualRate = parseFloat(elements.interestRate.value);
@@ -840,44 +1220,130 @@ function populatePaymentScheduleTable(schedule) {
     });
 }
 
+// Comparison calculation engine
+function calculateEMIComparison() {
+    const preEMIResult = calculatePreEMILoan();
+    const fullEMIResult = calculateFullEMILoan();
+    
+    if (!preEMIResult || !fullEMIResult) {
+        return null;
+    }
+    
+    // Calculate cash flow analysis
+    const constructionPeriod = parseInt(elements.constructionPeriod.value) || 18;
+    
+    // Construction period cash flow
+    let preEMIConstructionCashFlow = 0;
+    let fullEMIConstructionCashFlow = 0;
+    
+    preEMIResult.schedule.forEach(row => {
+        if (row.month > 0 && row.month <= constructionPeriod) {
+            preEMIConstructionCashFlow += row.emi + (row.prepayment || 0);
+        }
+    });
+    
+    fullEMIResult.schedule.forEach(row => {
+        if (row.month > 0 && row.month <= constructionPeriod) {
+            fullEMIConstructionCashFlow += row.emi + (row.prepayment || 0);
+        }
+    });
+    
+    const cashFlowDifference = fullEMIConstructionCashFlow - preEMIConstructionCashFlow;
+    const interestDifference = preEMIResult.totalInterest - fullEMIResult.totalInterest;
+    const tenureDifference = preEMIResult.actualTenure - fullEMIResult.actualTenure;
+    
+    // Break-even analysis: When does the lower total interest of Full EMI 
+    // compensate for the higher cash flow during construction?
+    let breakEvenMonth = 0;
+    let cumulativeSavings = -cashFlowDifference; // Start with the extra cash flow spent
+    
+    for (let month = constructionPeriod + 1; month <= Math.max(preEMIResult.actualTenure, fullEMIResult.actualTenure); month++) {
+        const preEMIRow = preEMIResult.schedule.find(r => r.month === month);
+        const fullEMIRow = fullEMIResult.schedule.find(r => r.month === month);
+        
+        if (preEMIRow && fullEMIRow) {
+            const monthlyInterestSaving = preEMIRow.interest - fullEMIRow.interest;
+            cumulativeSavings += monthlyInterestSaving;
+            
+            if (cumulativeSavings >= 0 && breakEvenMonth === 0) {
+                breakEvenMonth = month;
+                break;
+            }
+        }
+    }
+    
+    return {
+        preEMI: preEMIResult,
+        fullEMI: fullEMIResult,
+        comparison: {
+            constructionCashFlow: {
+                preEMI: preEMIConstructionCashFlow,
+                fullEMI: fullEMIConstructionCashFlow,
+                difference: cashFlowDifference
+            },
+            totalInterest: {
+                preEMI: preEMIResult.totalInterest,
+                fullEMI: fullEMIResult.totalInterest,
+                savings: interestDifference
+            },
+            tenure: {
+                preEMI: preEMIResult.actualTenure,
+                fullEMI: fullEMIResult.actualTenure,
+                difference: tenureDifference
+            },
+            breakEvenMonth: breakEvenMonth
+        }
+    };
+}
+
 // Main calculation function
 function performLoanCalculation() {
     const container = document.querySelector('.container');
     container.classList.add('loading');
     
     setTimeout(() => {
-        const result = calculateProgressiveLoan();
-        const baseResult = calculateBaseLoan();
+        const selectedMethod = getSelectedEMIMethod();
+        const resultsView = getSelectedResultsView();
         
-        if (!result) {
-            container.classList.remove('loading');
-            return;
+        let result;
+        let comparisonData = null;
+        
+        if (resultsView === 'comparison') {
+            // Calculate both methods for comparison
+            comparisonData = calculateEMIComparison();
+            if (!comparisonData) {
+                container.classList.remove('loading');
+                return;
+            }
+            result = comparisonData.preEMI; // Default to Pre-EMI for main display
+        } else {
+            // Calculate selected method only
+            if (selectedMethod === 'preemi') {
+                result = calculatePreEMILoan();
+            } else {
+                result = calculateFullEMILoan();
+            }
+            
+            if (!result) {
+                container.classList.remove('loading');
+                return;
+            }
         }
+        
+        const baseResult = calculateBaseLoan();
         
         // Calculate completion date
         const startDate = new Date(result.startDate);
         const completionDate = new Date(startDate);
         completionDate.setMonth(completionDate.getMonth() + result.actualTenure);
         
-        // Update summary cards
-        elements.currentEMI.textContent = formatCurrency(result.currentEMI);
-        elements.totalInterest.textContent = formatCurrency(result.totalInterest);
-        elements.totalPayment.textContent = formatCurrency(result.totalPayment);
-        elements.loanDuration.textContent = calculateYearsMonths(result.actualTenure);
-        elements.completionDate.textContent = completionDate.toLocaleDateString('en-US', { 
-            year: 'numeric', 
-            month: 'long' 
-        });
-        
-        const interestSaved = baseResult.totalInterest - result.totalInterest;
-        elements.interestSaved.textContent = formatCurrency(Math.max(0, interestSaved));
-        
-        // Create charts
-        createEMIBreakdownChart(result.schedule);
-        createPaymentTimelineChart(result.schedule);
-        
-        // Populate table
-        populatePaymentScheduleTable(result.schedule);
+        if (resultsView === 'comparison') {
+            // Display comparison results
+            displayComparisonResults(comparisonData);
+        } else {
+            // Display individual results
+            displayIndividualResults(result, baseResult, completionDate);
+        }
         
         // Show results
         elements.resultsSection.style.display = 'block';
@@ -887,12 +1353,438 @@ function performLoanCalculation() {
     }, 500);
 }
 
+// Display individual results
+function displayIndividualResults(result, baseResult, completionDate) {
+    // Update summary cards
+    elements.currentEMI.textContent = formatCurrency(result.currentEMI);
+    elements.totalInterest.textContent = formatCurrency(result.totalInterest);
+    elements.totalPayment.textContent = formatCurrency(result.totalPayment);
+    elements.loanDuration.textContent = calculateYearsMonths(result.actualTenure);
+    elements.completionDate.textContent = completionDate.toLocaleDateString('en-US', { 
+        year: 'numeric', 
+        month: 'long' 
+    });
+    
+    const interestSaved = baseResult.totalInterest - result.totalInterest;
+    elements.interestSaved.textContent = formatCurrency(Math.max(0, interestSaved));
+    
+    // Create charts
+    createEMIBreakdownChart(result.schedule);
+    createPaymentTimelineChart(result.schedule);
+    
+    // Populate table
+    populatePaymentScheduleTable(result.schedule);
+}
+
+// Display comparison results
+function displayComparisonResults(comparisonData) {
+    // Update the results section to show comparison
+    updateResultsSectionForComparison(comparisonData);
+    
+    // Create comparison charts
+    createComparisonCharts(comparisonData);
+    
+    // Populate comparison table
+    populateComparisonTable(comparisonData);
+}
+
+// Update results section for comparison view
+function updateResultsSectionForComparison(comparisonData) {
+    const { preEMI, fullEMI, comparison } = comparisonData;
+    
+    // Clear existing results section content
+    const resultsSection = elements.resultsSection;
+    
+    // Create comparison summary cards
+    const summaryHTML = `
+        <h2>📊 EMI Method Comparison Results</h2>
+        
+        <!-- Key Metrics Comparison -->
+        <div class="comparison-summary">
+            <div class="comparison-metric">
+                <h4>💰 Construction Period Cash Flow</h4>
+                <div class="metric-comparison">
+                    <div class="metric-item pre-emi">
+                        <span class="label">Pre-EMI:</span>
+                        <span class="value">${formatCurrency(comparison.constructionCashFlow.preEMI)}</span>
+                    </div>
+                    <div class="metric-item full-emi">
+                        <span class="label">Full EMI:</span>
+                        <span class="value">${formatCurrency(comparison.constructionCashFlow.fullEMI)}</span>
+                    </div>
+                    <div class="metric-difference ${comparison.constructionCashFlow.difference > 0 ? 'negative' : 'positive'}">
+                        <span class="label">Extra Cash Flow (Full EMI):</span>
+                        <span class="value">${formatCurrency(Math.abs(comparison.constructionCashFlow.difference))}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-metric">
+                <h4>🏦 Total Interest Paid</h4>
+                <div class="metric-comparison">
+                    <div class="metric-item pre-emi">
+                        <span class="label">Pre-EMI:</span>
+                        <span class="value">${formatCurrency(comparison.totalInterest.preEMI)}</span>
+                    </div>
+                    <div class="metric-item full-emi">
+                        <span class="label">Full EMI:</span>
+                        <span class="value">${formatCurrency(comparison.totalInterest.fullEMI)}</span>
+                    </div>
+                    <div class="metric-difference ${comparison.totalInterest.savings > 0 ? 'positive' : 'negative'}">
+                        <span class="label">Interest Savings (Full EMI):</span>
+                        <span class="value">${formatCurrency(Math.abs(comparison.totalInterest.savings))}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-metric">
+                <h4>📅 Loan Tenure</h4>
+                <div class="metric-comparison">
+                    <div class="metric-item pre-emi">
+                        <span class="label">Pre-EMI:</span>
+                        <span class="value">${calculateYearsMonths(comparison.tenure.preEMI)}</span>
+                    </div>
+                    <div class="metric-item full-emi">
+                        <span class="label">Full EMI:</span>
+                        <span class="value">${calculateYearsMonths(comparison.tenure.fullEMI)}</span>
+                    </div>
+                    <div class="metric-difference ${comparison.tenure.difference > 0 ? 'positive' : 'negative'}">
+                        <span class="label">Tenure Reduction:</span>
+                        <span class="value">${Math.abs(comparison.tenure.difference)} months</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="comparison-metric break-even">
+                <h4>⚖️ Break-Even Analysis</h4>
+                <div class="break-even-info">
+                    ${comparison.breakEvenMonth > 0 
+                        ? `<p>Full EMI method breaks even in <strong>${comparison.breakEvenMonth} months</strong> (${formatMonthYear(comparison.breakEvenMonth, preEMI.startDate)})</p>
+                           <p class="break-even-explanation">After this point, the interest savings compensate for the extra cash flow during construction.</p>`
+                        : `<p><strong>Full EMI method does not break even</strong> within the loan tenure.</p>
+                           <p class="break-even-explanation">The extra cash flow during construction exceeds the total interest savings.</p>`
+                    }
+                </div>
+            </div>
+        </div>
+    `;
+    
+    resultsSection.innerHTML = summaryHTML;
+}
+
+// Create comparison charts
+function createComparisonCharts(comparisonData) {
+    const { preEMI, fullEMI } = comparisonData;
+    
+    // Create side-by-side breakdown charts
+    createComparisonBreakdownCharts(preEMI, fullEMI);
+    
+    // Create timeline comparison chart
+    createTimelineComparisonChart(preEMI, fullEMI);
+    
+    // Add charts to results section
+    const chartsHTML = `
+        <div class="charts-section comparison-charts">
+            <div class="chart-container">
+                <canvas id="preEMIBreakdownChart"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="fullEMIBreakdownChart"></canvas>
+            </div>
+        </div>
+        <div class="chart-container timeline-comparison">
+            <canvas id="timelineComparisonChart"></canvas>
+        </div>
+    `;
+    
+    elements.resultsSection.insertAdjacentHTML('beforeend', chartsHTML);
+    
+    // Now create the actual charts
+    createComparisonBreakdownCharts(preEMI, fullEMI);
+    createTimelineComparisonChart(preEMI, fullEMI);
+}
+
+// Create breakdown comparison charts
+function createComparisonBreakdownCharts(preEMI, fullEMI) {
+    const loanAmount = parseFloat(elements.loanAmount.value);
+    
+    // Pre-EMI breakdown chart
+    const preEMICtx = document.getElementById('preEMIBreakdownChart')?.getContext('2d');
+    if (preEMICtx) {
+        new Chart(preEMICtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Principal', 'Interest'],
+                datasets: [{
+                    data: [loanAmount, preEMI.totalInterest],
+                    backgroundColor: ['#3498db', '#e74c3c'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Pre-EMI Method - Payment Breakdown',
+                        font: { size: 14, weight: 'bold' }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+    
+    // Full EMI breakdown chart
+    const fullEMICtx = document.getElementById('fullEMIBreakdownChart')?.getContext('2d');
+    if (fullEMICtx) {
+        new Chart(fullEMICtx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Principal', 'Interest'],
+                datasets: [{
+                    data: [loanAmount, fullEMI.totalInterest],
+                    backgroundColor: ['#27ae60', '#f39c12'],
+                    borderWidth: 2,
+                    borderColor: '#fff'
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    title: {
+                        display: true,
+                        text: 'Full EMI Method - Payment Breakdown',
+                        font: { size: 14, weight: 'bold' }
+                    },
+                    legend: {
+                        position: 'bottom'
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Create timeline comparison chart
+function createTimelineComparisonChart(preEMI, fullEMI) {
+    const ctx = document.getElementById('timelineComparisonChart')?.getContext('2d');
+    if (!ctx) return;
+    
+    const maxLength = Math.max(preEMI.schedule.length, fullEMI.schedule.length);
+    const months = [];
+    const preEMIPayments = [];
+    const fullEMIPayments = [];
+    const preEMIBalance = [];
+    const fullEMIBalance = [];
+    
+    for (let i = 0; i < maxLength; i++) {
+        if (i < preEMI.schedule.length) {
+            months.push(preEMI.schedule[i].date);
+            preEMIPayments.push(preEMI.schedule[i].emi);
+            preEMIBalance.push(preEMI.schedule[i].balance);
+        }
+        if (i < fullEMI.schedule.length) {
+            fullEMIPayments.push(fullEMI.schedule[i].emi);
+            fullEMIBalance.push(fullEMI.schedule[i].balance);
+        }
+    }
+    
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: months,
+            datasets: [{
+                label: 'Pre-EMI Monthly Payment',
+                data: preEMIPayments,
+                borderColor: '#e74c3c',
+                backgroundColor: 'rgba(231, 76, 60, 0.1)',
+                fill: false,
+                yAxisID: 'y'
+            }, {
+                label: 'Full EMI Monthly Payment',
+                data: fullEMIPayments,
+                borderColor: '#f39c12',
+                backgroundColor: 'rgba(243, 156, 18, 0.1)',
+                fill: false,
+                yAxisID: 'y'
+            }, {
+                label: 'Pre-EMI Outstanding Balance',
+                data: preEMIBalance,
+                borderColor: '#3498db',
+                backgroundColor: 'rgba(52, 152, 219, 0.1)',
+                fill: false,
+                yAxisID: 'y1',
+                borderDash: [5, 5]
+            }, {
+                label: 'Full EMI Outstanding Balance',
+                data: fullEMIBalance,
+                borderColor: '#27ae60',
+                backgroundColor: 'rgba(39, 174, 96, 0.1)',
+                fill: false,
+                yAxisID: 'y1',
+                borderDash: [5, 5]
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                title: {
+                    display: true,
+                    text: 'EMI Methods Timeline Comparison',
+                    font: { size: 16, weight: 'bold' }
+                }
+            },
+            scales: {
+                x: {
+                    display: true,
+                    ticks: {
+                        maxTicksLimit: 15
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Monthly Payment (₹)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + (value / 1000).toFixed(0) + 'K';
+                        }
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    beginAtZero: true,
+                    title: {
+                        display: true,
+                        text: 'Outstanding Balance (₹)'
+                    },
+                    ticks: {
+                        callback: function(value) {
+                            return '₹' + (value / 100000).toFixed(1) + 'L';
+                        }
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    }
+                }
+            }
+        }
+    });
+}
+
+// Populate comparison table
+function populateComparisonTable(comparisonData) {
+    const { preEMI, fullEMI } = comparisonData;
+    const constructionPeriod = parseInt(elements.constructionPeriod.value) || 18;
+    
+    const tableHTML = `
+        <div class="table-section comparison-table">
+            <h3>📋 Detailed Payment Schedule Comparison</h3>
+            <div class="table-container">
+                <table id="comparisonScheduleTable">
+                    <thead>
+                        <tr>
+                            <th>Month</th>
+                            <th>Date</th>
+                            <th colspan="2">Pre-EMI Method</th>
+                            <th colspan="2">Full EMI Method</th>
+                            <th>Difference</th>
+                        </tr>
+                        <tr class="sub-header">
+                            <th></th>
+                            <th></th>
+                            <th>Payment</th>
+                            <th>Balance</th>
+                            <th>Payment</th>
+                            <th>Balance</th>
+                            <th>Monthly Savings</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    `;
+    
+    elements.resultsSection.insertAdjacentHTML('beforeend', tableHTML);
+    
+    const tbody = document.querySelector('#comparisonScheduleTable tbody');
+    const maxLength = Math.max(preEMI.schedule.length, fullEMI.schedule.length);
+    
+    for (let i = 0; i < maxLength && i < 50; i++) { // Limit to first 50 rows for performance
+        const preRow = i < preEMI.schedule.length ? preEMI.schedule[i] : null;
+        const fullRow = i < fullEMI.schedule.length ? fullEMI.schedule[i] : null;
+        
+        if (!preRow && !fullRow) continue;
+        
+        const tr = document.createElement('tr');
+        
+        const month = preRow ? preRow.month : fullRow.month;
+        const date = preRow ? preRow.date : fullRow.date;
+        const prePayment = preRow ? preRow.emi : 0;
+        const preBalance = preRow ? preRow.balance : 0;
+        const fullPayment = fullRow ? fullRow.emi : 0;
+        const fullBalance = fullRow ? fullRow.balance : 0;
+        const monthlySavings = prePayment - fullPayment;
+        
+        // Add construction period styling
+        if (month <= constructionPeriod) {
+            tr.classList.add('construction-period');
+        }
+        
+        tr.innerHTML = `
+            <td>${month === 0 ? 'Start' : month}</td>
+            <td>${date}</td>
+            <td class="currency">${formatCurrency(prePayment)}</td>
+            <td class="currency">${formatCurrency(preBalance)}</td>
+            <td class="currency">${formatCurrency(fullPayment)}</td>
+            <td class="currency">${formatCurrency(fullBalance)}</td>
+            <td class="currency ${monthlySavings > 0 ? 'positive' : monthlySavings < 0 ? 'negative' : ''}">
+                ${monthlySavings !== 0 ? formatCurrency(Math.abs(monthlySavings)) : '-'}
+            </td>
+        `;
+        
+        tbody.appendChild(tr);
+    }
+}
+
 // Event listeners
 elements.addDisbursement.addEventListener('click', addDisbursementRow);
 elements.clearDisbursements.addEventListener('click', clearAllDisbursements);
 elements.addPrepayment.addEventListener('click', addPrepaymentRow);
 elements.clearPrepayments.addEventListener('click', clearAllPrepayments);
+elements.recalculatePrepayments.addEventListener('click', recalculateAllPrepaymentAmounts);
 elements.calculateLoan.addEventListener('click', performLoanCalculation);
+
+// Prepayment parameter change listeners for real-time recalculation
+elements.basePrepaymentAmount.addEventListener('input', () => {
+    recalculateAllPrepaymentAmounts();
+    autoSave();
+});
+
+elements.prepaymentGrowthRate.addEventListener('input', () => {
+    recalculateAllPrepaymentAmounts();
+    autoSave();
+});
+
+elements.prepaymentGrowthType.addEventListener('change', () => {
+    recalculateAllPrepaymentAmounts();
+    autoSave();
+});
 
 // Save/Load event listeners
 elements.saveScenario.addEventListener('click', saveCurrentScenario);

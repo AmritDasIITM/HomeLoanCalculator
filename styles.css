@@ -412,6 +412,27 @@ table tr:nth-child(even):hover {
     margin-bottom: 0;
 }
 
+.calculated-amount-info {
+    color: #6c757d;
+    font-size: 0.8rem;
+    font-style: italic;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.prepayment-item input[readonly] {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    color: #495057;
+    cursor: not-allowed;
+}
+
+.prepayment-item input[readonly]:focus {
+    background-color: #f8f9fa;
+    border-color: #dee2e6;
+    box-shadow: none;
+}
+
 /* Interest Rate Comparison */
 .comparison-results {
     margin-top: 20px;
@@ -876,9 +897,272 @@ table th:first-child {
 /* Mobile disbursement controls */
 .disbursement-controls {
     display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 15px;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    flex-wrap: wrap;
+}
+
+/* EMI Method Selection Styling */
+.emi-method-section {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.emi-method-section h3 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.toggle-group {
+    display: flex;
+    gap: 1rem;
+    margin-top: 0.5rem;
+}
+
+.toggle-option {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    padding: 0.5rem 1rem;
+    border: 2px solid #dee2e6;
+    border-radius: 6px;
+    background: white;
+    transition: all 0.3s ease;
+    font-weight: 500;
+}
+
+.toggle-option:hover {
+    border-color: #3498db;
+    background: #f8f9fa;
+}
+
+.toggle-option input[type="radio"] {
+    margin-right: 0.5rem;
+    accent-color: #3498db;
+}
+
+.toggle-option input[type="radio"]:checked + span {
+    color: #3498db;
+    font-weight: 600;
+}
+
+.emi-methods {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.emi-method-option {
+    border: 2px solid #dee2e6;
+    border-radius: 8px;
+    background: white;
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.emi-method-option:hover {
+    border-color: #3498db;
+    box-shadow: 0 4px 12px rgba(52, 152, 219, 0.1);
+}
+
+.method-header {
+    background: linear-gradient(135deg, #34495e 0%, #2c3e50 100%);
+    padding: 1rem;
+    color: white;
+}
+
+.method-selector {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+    margin: 0;
+    font-weight: 600;
+}
+
+.method-selector input[type="radio"] {
+    margin-right: 0.75rem;
+    transform: scale(1.2);
+    accent-color: #3498db;
+}
+
+.method-title {
+    font-size: 1.1rem;
+    color: white;
+}
+
+.method-description {
+    padding: 1.25rem;
+    background: white;
+}
+
+.method-description p {
+    margin: 0 0 1rem 0;
+    color: #495057;
+    line-height: 1.5;
+}
+
+.method-description ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    list-style: none;
+}
+
+.method-description li {
+    margin-bottom: 0.5rem;
+    color: #495057;
+    position: relative;
+    line-height: 1.4;
+}
+
+.method-description li::before {
+    content: '';
+    position: absolute;
+    left: -1.5rem;
+    top: 0.5rem;
+    width: 4px;
+    height: 4px;
+    background: #3498db;
+    border-radius: 50%;
+}
+
+/* Selected method styling */
+.emi-method-option:has(input[type="radio"]:checked) {
+    border-color: #3498db;
+    box-shadow: 0 4px 15px rgba(52, 152, 219, 0.2);
+}
+
+.emi-method-option:has(input[type="radio"]:checked) .method-header {
+    background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+}
+
+/* Mobile responsive for EMI methods */
+@media (max-width: 768px) {
+    .emi-methods {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .toggle-group {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .toggle-option {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .method-description {
+        padding: 1rem;
+    }
+    
+    .method-description ul {
+        padding-left: 1rem;
+    }
+    
+    .method-description li::before {
+        left: -1rem;
+    }
+}
+
+/* Prepayment Configuration Styling */
+.prepayment-config {
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.prepayment-config h3 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.prepayment-config .form-row {
+    gap: 1rem;
+}
+
+.prepayment-config .form-group {
+    flex: 1;
+    min-width: 200px;
+}
+
+.prepayment-config small {
+    color: #6c757d;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+    display: block;
+}
+
+.prepayment-config select {
+    width: 100%;
+    padding: 0.75rem;
+    border: 1px solid #ced4da;
+    border-radius: 6px;
+    font-size: 1rem;
+    background-color: #fff;
+    color: #333;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+    background-position: right 0.5rem center;
+    background-repeat: no-repeat;
+    background-size: 1.5em 1.5em;
+    padding-right: 2.5rem;
+}
+
+.prepayment-config select:focus {
+    outline: none;
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+
+/* Enhanced disbursement summary to include average */
+.disbursement-summary {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 6px;
+    border: 1px solid #e9ecef;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+
+.disbursement-summary span {
+    font-weight: 500;
+    color: #495057;
+    white-space: nowrap;
+}
+
+@media (max-width: 768px) {
+    .prepayment-config .form-row {
+        flex-direction: column;
+    }
+    
+    .prepayment-config .form-group {
+        min-width: unset;
+    }
+    
+    .disbursement-summary {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 0.5rem;
+    }
+    
+    .disbursement-summary span {
+        text-align: center;
+    }
 }
 
 .disbursement-controls button {
@@ -1127,6 +1411,161 @@ button:focus {
     .loading .btn-calculate {
         font-size: 1rem;
     }
+}
+
+/* Comparison Results Styling */
+.comparison-summary {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-bottom: 2rem;
+}
+
+.comparison-metric {
+    background: white;
+    border-radius: 10px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-left: 4px solid #3498db;
+}
+
+.comparison-metric h4 {
+    margin: 0 0 1rem 0;
+    color: #2c3e50;
+    font-size: 1.1rem;
+    font-weight: 600;
+}
+
+.metric-comparison {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+
+.metric-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+}
+
+.metric-item.pre-emi {
+    color: #e74c3c;
+    font-weight: 500;
+}
+
+.metric-item.full-emi {
+    color: #f39c12;
+    font-weight: 500;
+}
+
+.metric-difference {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.75rem;
+    border-radius: 6px;
+    font-weight: 600;
+    margin-top: 0.5rem;
+}
+
+.metric-difference.positive {
+    background: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.metric-difference.negative {
+    background: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.break-even {
+    border-left-color: #f39c12;
+}
+
+.break-even-info p {
+    margin: 0 0 0.5rem 0;
+    line-height: 1.5;
+}
+
+.break-even-explanation {
+    font-size: 0.9rem;
+    color: #6c757d;
+    font-style: italic;
+}
+
+/* Comparison Charts */
+.comparison-charts {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin-bottom: 2rem;
+}
+
+.timeline-comparison {
+    margin-bottom: 2rem;
+}
+
+.comparison-table {
+    margin-top: 2rem;
+}
+
+.comparison-table .sub-header {
+    background: #495057 !important;
+    font-size: 0.85rem;
+}
+
+.comparison-table .construction-period {
+    background: #fff3cd !important;
+    border-left: 3px solid #ffc107;
+}
+
+.comparison-table .positive {
+    color: #155724;
+    font-weight: 600;
+}
+
+.comparison-table .negative {
+    color: #721c24;
+    font-weight: 600;
+}
+
+/* Mobile responsiveness for comparison */
+@media (max-width: 768px) {
+    .comparison-summary {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .comparison-metric {
+        padding: 1rem;
+    }
+    
+    .comparison-charts {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .metric-item {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+    }
+    
+    .metric-difference {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        text-align: left;
+    }
+}
+
+/* Construction period highlighting */
+.construction-row {
+    background-color: #fff3cd !important;
+    border-left: 4px solid #ffc107;
 }
 
 /* Loading state */
