@@ -80,19 +80,7 @@ A comprehensive progressive disbursement home loan calculator with advanced EMI 
 
 ## 🚀 Quick Start
 
-### **Option 1: GitHub Pages (Recommended)**
-Visit the live calculator: `https://[your-username].github.io/HomeLoanCalculator`
-
-### **Option 2: Local Development**
-1. Clone or download this repository
-2. Open `index.html` in your web browser
-3. Start calculating your home loan scenarios!
-
-```bash
-git clone https://github.com/[your-username]/HomeLoanCalculator.git
-cd HomeLoanCalculator
-# Open index.html in your browser
-```
+Available at: https://amritdasiitm.github.io/HomeLoanCalculator/
 
 ## 📁 File Structure
 
@@ -157,10 +145,6 @@ HomeLoanCalculator/
 2. **Instant analysis**: See EMI, interest, and total payment differences
 3. **Best rate highlighting**: Automatically shows most economical option
 
-## 🌐 GitHub Pages Deployment
-
-Available at: https://amritdasiitm.github.io/HomeLoanCalculator/
-
 ## 💡 Example Scenarios
 
 ### **Scenario 1: Standard Home Loan**
@@ -207,4 +191,5 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 - **Open Source**: Built with community-first mindset
 
 *Made with ❤️ for better financial planning*
+
 
